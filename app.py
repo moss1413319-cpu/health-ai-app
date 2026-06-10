@@ -4,6 +4,7 @@ import math
 import base64
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session
+from flask_sqlalchemy import SQLAlchemy
 from PIL import Image, ImageDraw, ImageFont
 
 # 嘗試載入 MediaPipe 與 OpenCV，並設計相容降級機制
@@ -18,9 +19,46 @@ except ImportError:
     import numpy as np
 
 app = Flask(__name__)
-app.secret_key = 'health_ai_secret_key_for_session_storage'
+app.secret_key = os.environ.get('SECRET_KEY', 'health_ai_secret_key_for_session_storage')
 
-# 初始化儲存庫 (若重啟 Server 會清空，但使用 Session 持久化於使用者瀏覽器中)
+# --- MySQL 資料庫連線設定 (支援 Zeabur 雲端環境) ---
+db_user = os.environ.get('MYSQL_USER', 'root')
+db_password = os.environ.get('MYSQL_PASSWORD', '19940214')
+db_host = os.environ.get('MYSQL_HOST', 'localhost')
+db_port = os.environ.get('MYSQL_PORT', '3306')
+db_name = os.environ.get('MYSQL_DATABASE', 'health_db') # 如果 Zeabur 沒有給 Database name，預設用 health_db
+
+# 為了防止 Zeabur 上的資料庫還沒建立就連線失敗，我們可以做個防護
+db_uri = os.environ.get('DATABASE_URL', f'mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}')
+# 有時候雲端環境的 DATABASE_URL 開頭是 mysql://，SQLAlchemy 較新版要求 mysql+pymysql://
+if db_uri.startswith('mysql://'):
+    db_uri = db_uri.replace('mysql://', 'mysql+pymysql://', 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
+
+# --- 定義血壓記錄資料表 ---
+class BloodPressureRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    dob = db.Column(db.String(20))
+    gender = db.Column(db.String(10))
+    measure_time = db.Column(db.String(50))
+    left_sys = db.Column(db.Integer)
+    left_dia = db.Column(db.Integer)
+    right_sys = db.Column(db.Integer)
+    right_dia = db.Column(db.Integer)
+    sys_diff = db.Column(db.Integer)
+    sys_diff_pct = db.Column(db.Integer)
+    heart_rate = db.Column(db.Integer)
+    spo2 = db.Column(db.Integer)
+    status_level = db.Column(db.String(20))
+    warnings = db.Column(db.JSON)
+
+with app.app_context():
+    db.create_all()
+
 # 預設一些範例紀錄讓初學者一打開就有資料看
 DEFAULT_HISTORY = [
     {
@@ -494,10 +532,6 @@ def index():
 
 @app.route('/blood_pressure', methods=['GET', 'POST'])
 def blood_pressure():
-    # 自 session 中載入歷史紀錄，如果為空則初始化預設範例
-    if 'bp_history' not in session:
-        session['bp_history'] = DEFAULT_HISTORY
-
     latest_result = None
     last_inputs = None
 
@@ -528,29 +562,43 @@ def blood_pressure():
                 left_sys, left_dia, right_sys, right_dia, heart_rate, spo2
             )
             
-            # 組裝紀錄物件
-            latest_result = {
-                'name': name,
-                'dob': dob,
-                'gender': gender,
-                'measure_time': measure_time,
-                'left_sys': left_sys,
-                'left_dia': left_dia,
-                'right_sys': right_sys,
-                'right_dia': right_dia,
-                'sys_diff': check_res['sys_diff'],
-                'sys_diff_pct': check_res['sys_diff_pct'],
-                'heart_rate': heart_rate,
-                'spo2': spo2,
-                'status_level': check_res['status_level'],
-                'warnings': check_res['warnings']
-            }
+            # 儲存到 MySQL 資料庫
+            new_record = BloodPressureRecord(
+                name=name,
+                dob=dob,
+                gender=gender,
+                measure_time=measure_time,
+                left_sys=left_sys,
+                left_dia=left_dia,
+                right_sys=right_sys,
+                right_dia=right_dia,
+                sys_diff=check_res['sys_diff'],
+                sys_diff_pct=check_res['sys_diff_pct'],
+                heart_rate=heart_rate,
+                spo2=spo2,
+                status_level=check_res['status_level'],
+                warnings=check_res['warnings']
+            )
+            db.session.add(new_record)
+            db.session.commit()
             
-            # 儲存到 Session 歷史紀錄 (插到最前面)
-            history = session['bp_history']
-            history.insert(0, latest_result)
-            session['bp_history'] = history
-            session.modified = True
+            # 將最後一筆儲存成功的物件提供給前端顯示動畫
+            latest_result = {
+                'name': new_record.name,
+                'dob': new_record.dob,
+                'gender': new_record.gender,
+                'measure_time': new_record.measure_time,
+                'left_sys': new_record.left_sys,
+                'left_dia': new_record.left_dia,
+                'right_sys': new_record.right_sys,
+                'right_dia': new_record.right_dia,
+                'sys_diff': new_record.sys_diff,
+                'sys_diff_pct': new_record.sys_diff_pct,
+                'heart_rate': new_record.heart_rate,
+                'spo2': new_record.spo2,
+                'status_level': new_record.status_level,
+                'warnings': new_record.warnings
+            }
             
         except Exception as e:
             # 錯誤處理 (例如型態轉換失敗)
@@ -564,10 +612,35 @@ def blood_pressure():
                 }]
             }
 
+    # 從資料庫讀取所有歷史紀錄，依 ID 遞減排序 (最新的在最前面)
+    db_records = BloodPressureRecord.query.order_by(BloodPressureRecord.id.desc()).all()
+    history = []
+    for r in db_records:
+        history.append({
+            'name': r.name,
+            'dob': r.dob,
+            'gender': r.gender,
+            'measure_time': r.measure_time,
+            'left_sys': r.left_sys,
+            'left_dia': r.left_dia,
+            'right_sys': r.right_sys,
+            'right_dia': r.right_dia,
+            'sys_diff': r.sys_diff,
+            'sys_diff_pct': r.sys_diff_pct,
+            'heart_rate': r.heart_rate,
+            'spo2': r.spo2,
+            'status_level': r.status_level,
+            'warnings': r.warnings
+        })
+
+    # 如果資料庫沒有任何資料，提供預設範例
+    if not history:
+        history = DEFAULT_HISTORY
+
     return render_template(
         'blood_pressure.html', 
         active_page='blood_pressure', 
-        history=session['bp_history'],
+        history=history,
         latest_result=latest_result,
         last_inputs=last_inputs
     )
@@ -632,5 +705,6 @@ def pose_detection():
 
 if __name__ == '__main__':
     # 本地開發啟動，初學者直接執行 python app.py 即可
-    # 支援 port 5000
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    # Zeabur 會自動指定 PORT 環境變數
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
