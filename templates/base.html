@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}大健康 AI 智慧檢測平台{% endblock %}</title>
+    <!-- Meta 標籤以最佳化 SEO -->
+    <meta name="description" content="結合人工智慧與大健康管理，提供心血管血壓記錄評估與 MediaPipe AI 骨骼點體態姿態檢測，幫助您維持健康好體態與安心生活。">
+    <meta name="keywords" content="大健康, AI, 血壓量測, 體態檢測, MediaPipe, 心血管防護, 姿態分析">
+    <meta name="author" content="Antigravity Health AI Team">
+    <!-- 載入自訂 CSS 樣式表 -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 電影感疊加層 (暗角與掃描線) -->
+    <div class="cinematic-overlay"></div>
+
+    <!-- 頂部導覽列 -->
+    <nav class="navbar" id="navbar">
+        <a href="{{ url_for('index') }}" class="nav-brand" id="brand-link">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+            </svg>
+            <span>Health AI 智慧健康</span>
+        </a>
+        <div class="nav-links" id="nav-links">
+            <a href="{{ url_for('index') }}" class="nav-link {% if active_page == 'index' %}active{% endif %}" id="nav-home">平台首頁</a>
+            <a href="{{ url_for('blood_pressure') }}" class="nav-link {% if active_page == 'blood_pressure' %}active{% endif %}" id="nav-bp">血壓量測紀錄</a>
+            <a href="{{ url_for('pose_detection') }}" class="nav-link {% if active_page == 'pose_detection' %}active{% endif %}" id="nav-pose">AI 體態檢測</a>
+        </div>
+    </nav>
+
+    <!-- 網頁主要內容區 -->
+    <main class="container" id="main-container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- 頁尾免責聲明與版權資訊 -->
+    <footer id="footer">
+        <div class="disclaimer-card" id="disclaimer-container">
+            <h4 class="disclaimer-title" id="disclaimer-title">【免責聲明與就醫溫馨提醒】</h4>
+            <p class="disclaimer-text" id="disclaimer-text">
+                本量測與檢測結果僅供健康管理與參考，不具醫療診斷及處方效益。本平台所產出之分析報告、健康雞湯與數值判斷均無法取代專業醫療評估。如您的身體有任何不適、疑問，或檢測數值出現異常警示，請務必諮詢專業醫療人員或安排專科醫生門診進行詳細診斷與治療。
+            </p>
+        </div>
+        <p class="footer-copy" id="footer-copyright">&copy; 2026 大健康 AI 智慧檢測平台. All Rights Reserved. 智慧科技，守護您的生命躍動。</p>
+    </footer>
+
+    <!-- 載入自訂 JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,845 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+/* --- 全域變數定義 --- */
+:root {
+    --bg-dark: #070b19;
+    --bg-deep: #0c1328;
+    --bg-card: rgba(16, 26, 48, 0.55);
+    --bg-card-hover: rgba(24, 38, 70, 0.75);
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    --color-primary: #00f2fe; /* 霓虹青 (AI 科技) */
+    --color-secondary: #4facfe; /* 科技藍 */
+    --color-success: #05c46b; /* 翡翠綠 (健康) */
+    --color-warning: #ffb300; /* 琥珀黃 (警示) */
+    --color-danger: #ff5e57; /* 珊瑚紅 (就醫警示) */
+    --color-glow: rgba(0, 242, 254, 0.15);
+    
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-color-active: rgba(0, 242, 254, 0.4);
+    
+    --font-outfit: 'Outfit', 'Noto Sans TC', sans-serif;
+}
+
+/* --- 基礎樣式 --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #03050a;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(0, 242, 254, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(79, 172, 254, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(12, 19, 40, 0.8) 0%, #010205 100%);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    font-family: var(--font-outfit);
+    font-size: 1.15rem; /* Scaled up base size */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    line-height: 1.7; /* More breathing room */
+}
+
+/* Cinematic Overlay */
+.cinematic-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+    /* Vignette and Scanlines */
+    background: 
+        radial-gradient(circle at center, transparent 40%, rgba(0, 0, 0, 0.8) 100%),
+        linear-gradient(rgba(255, 255, 255, 0.015) 50%, rgba(0, 0, 0, 0.015) 50%);
+    background-size: 100% 100%, 100% 4px;
+}
+
+/* --- 導覽列 --- */
+.navbar {
+    background: rgba(7, 11, 25, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+}
+
+.nav-brand svg {
+    stroke: var(--color-primary);
+    filter: drop-shadow(0 0 6px var(--color-primary));
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--color-primary);
+    background: rgba(0, 242, 254, 0.05);
+    border-color: rgba(0, 242, 254, 0.15);
+}
+
+/* --- 主體容器 --- */
+.container {
+    flex: 1;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+}
+
+/* --- 頁尾與免責聲明 --- */
+footer {
+    background: rgba(6, 9, 20, 0.95);
+    border-top: 1px solid var(--border-color);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    margin-top: auto;
+}
+
+.disclaimer-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    max-width: 800px;
+    margin: 0 auto 1rem auto;
+}
+
+.disclaimer-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.5px;
+}
+
+.disclaimer-text {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.footer-copy {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+}
+
+/* --- 卡片 & 玻璃帷幕效果 (Glassmorphism) --- */
+.glass-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* --- 首頁大門戶佈局 --- */
+.hero-section {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.hero-title {
+    font-size: 4.2rem;
+    font-weight: 800;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, #ffffff 30%, var(--text-secondary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    color: var(--text-secondary);
+    font-size: 1.4rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.portal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem;
+    margin-top: 2rem;
+}
+
+.portal-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.portal-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.portal-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--border-color-active);
+    box-shadow: 0 12px 40px 0 rgba(0, 242, 254, 0.1);
+    background: var(--bg-card-hover);
+}
+
+.portal-card:hover::before {
+    opacity: 1;
+}
+
+.soup-bubble {
+    background: rgba(0, 242, 254, 0.04);
+    border: 1px solid rgba(0, 242, 254, 0.15);
+    border-radius: 12px;
+    padding: 0.85rem 1.25rem;
+    font-size: 1.05rem;
+    color: var(--color-primary);
+    font-style: italic;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    position: relative;
+    text-align: center;
+    box-shadow: inset 0 0 12px rgba(0, 242, 254, 0.05);
+}
+
+.soup-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px 8px 0;
+    border-style: solid;
+    border-color: rgba(0, 242, 254, 0.15) transparent;
+    display: block;
+    width: 0;
+}
+
+.portal-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.portal-card:hover .portal-icon-wrapper {
+    background: rgba(0, 242, 254, 0.1);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+}
+
+.portal-card:hover .portal-icon-wrapper svg {
+    stroke: var(--color-primary);
+    transform: scale(1.1);
+}
+
+.portal-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.portal-desc {
+    color: var(--text-secondary);
+    font-size: 1.15rem;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+}
+
+.portal-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 1.25rem;
+    transition: gap 0.3s ease;
+    text-decoration: none;
+    margin-top: auto;
+}
+
+.portal-card:hover .portal-btn {
+    gap: 0.8rem;
+    text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+}
+
+/* --- 表單控制樣式 --- */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+}
+
+.form-control {
+    background: rgba(7, 11, 25, 0.6);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: var(--text-primary);
+    font-family: var(--font-outfit);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 12px rgba(0, 242, 254, 0.15);
+    background: rgba(7, 11, 25, 0.8);
+}
+
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.2rem;
+    padding-right: 2.5rem;
+}
+
+.btn-container {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    font-family: var(--font-outfit);
+    border: 1px solid transparent;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+    color: #030712;
+    box-shadow: 0 4px 15px rgba(0, 242, 254, 0.25);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 242, 254, 0.4);
+    filter: brightness(1.05);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--text-secondary);
+    transform: translateY(-2px);
+}
+
+/* --- 警告與狀態視窗 (Alert Panel) --- */
+.alert-box {
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    border-left: 5px solid transparent;
+    animation: slideIn 0.4s ease;
+}
+
+.alert-box svg {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+}
+
+.alert-danger {
+    background: rgba(255, 94, 87, 0.08);
+    border: 1px solid rgba(255, 94, 87, 0.2);
+    border-left-color: var(--color-danger);
+}
+
+.alert-danger svg {
+    stroke: var(--color-danger);
+}
+
+.alert-warning {
+    background: rgba(255, 179, 0, 0.08);
+    border: 1px solid rgba(255, 179, 0, 0.2);
+    border-left-color: var(--color-warning);
+}
+
+.alert-warning svg {
+    stroke: var(--color-warning);
+}
+
+.alert-success {
+    background: rgba(5, 196, 107, 0.08);
+    border: 1px solid rgba(5, 196, 107, 0.2);
+    border-left-color: var(--color-success);
+}
+
+.alert-success svg {
+    stroke: var(--color-success);
+}
+
+.alert-content {
+    flex-grow: 1;
+}
+
+.alert-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.35rem;
+}
+
+.alert-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.alert-list {
+    margin-top: 0.5rem;
+    padding-left: 1.2rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.alert-list li {
+    margin-bottom: 0.25rem;
+}
+
+/* --- 記錄表格設計 --- */
+.table-container {
+    overflow-x: auto;
+    margin-top: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.health-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.health-table th {
+    background: rgba(12, 19, 40, 0.8);
+    color: var(--text-secondary);
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    letter-spacing: 0.5px;
+}
+
+.health-table td {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.health-table tr:last-child td {
+    border-bottom: none;
+}
+
+.health-table tr {
+    transition: background-color 0.2s ease;
+}
+
+.health-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* 警示行狀態 */
+.row-warning {
+    background: rgba(255, 179, 0, 0.03) !important;
+}
+.row-warning:hover {
+    background: rgba(255, 179, 0, 0.06) !important;
+}
+.row-danger {
+    background: rgba(255, 94, 87, 0.03) !important;
+    border-left: 3px solid var(--color-danger);
+}
+.row-danger:hover {
+    background: rgba(255, 94, 87, 0.06) !important;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-normal {
+    background: rgba(5, 196, 107, 0.15);
+    color: var(--color-success);
+    border: 1px solid rgba(5, 196, 107, 0.25);
+}
+
+.badge-warning {
+    background: rgba(255, 179, 0, 0.15);
+    color: var(--color-warning);
+    border: 1px solid rgba(255, 179, 0, 0.25);
+}
+
+.badge-danger {
+    background: rgba(255, 94, 87, 0.15);
+    color: var(--color-danger);
+    border: 1px solid rgba(255, 94, 87, 0.25);
+    box-shadow: 0 0 8px rgba(255, 94, 87, 0.2);
+}
+
+/* --- 體態檢測拖放上傳區 --- */
+.upload-container {
+    border: 2px dashed var(--border-color);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.01);
+    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.upload-container:hover, .upload-container.dragover {
+    border-color: var(--color-primary);
+    background: rgba(0, 242, 254, 0.03);
+    box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.05);
+}
+
+.upload-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.upload-container:hover .upload-icon-wrapper {
+    background: rgba(0, 242, 254, 0.08);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
+}
+
+.upload-container:hover .upload-icon-wrapper svg {
+    stroke: var(--color-primary);
+    transform: translateY(-4px);
+}
+
+.upload-icon-wrapper svg {
+    transition: all 0.3s ease;
+}
+
+.upload-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.upload-hint {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.file-input {
+    display: none;
+}
+
+/* --- 載入動畫 (Scanner Effect) --- */
+.loading-wrapper {
+    display: none; /* 預設隱藏 */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 0;
+    gap: 1.5rem;
+}
+
+.scanner-box {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scanner-box svg {
+    stroke: rgba(0, 242, 254, 0.2);
+    width: 100px;
+    height: 100px;
+}
+
+.scanner-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, var(--color-primary), transparent);
+    box-shadow: 0 0 12px var(--color-primary);
+    animation: scan 2s linear infinite;
+}
+
+.loading-text {
+    font-size: 0.95rem;
+    color: var(--color-primary);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
+}
+
+/* --- 體態分析結果佈局 --- */
+.result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.result-image-wrapper {
+    position: relative;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    background: #030712;
+    aspect-ratio: 4 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.result-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.result-report-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.report-section-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-left: 4px solid var(--color-primary);
+    padding-left: 0.75rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+}
+
+.metric-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.metric-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.35rem;
+}
+
+.metric-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+}
+
+.metric-status {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    font-weight: 600;
+}
+
+.report-advice-box {
+    background: rgba(5, 196, 107, 0.03);
+    border: 1px solid rgba(5, 196, 107, 0.15);
+    border-radius: 12px;
+    padding: 1.25rem;
+}
+
+.report-advice-title {
+    color: var(--color-success);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.report-advice-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.report-advice-list {
+    margin-top: 0.5rem;
+    padding-left: 1.2rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.report-advice-list li {
+    margin-bottom: 0.35rem;
+}
+
+/* --- 動畫定義 --- */
+@keyframes scan {
+    0% { top: 0%; }
+    50% { top: 100%; }
+    100% { top: 0%; }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- 響應式微調 --- */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+    .nav-links {
+        width: 100%;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    .nav-link {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+    }
+    .container {
+        padding: 1.5rem 1rem;
+    }
+    .hero-title {
+        font-size: 1.85rem;
+    }
+    .glass-card {
+        padding: 1.25rem;
+    }
+}

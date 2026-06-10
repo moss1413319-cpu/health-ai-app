@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}平台首頁 | 大健康 AI 智慧檢測平台{% endblock %}
+
+{% block content %}
+<!-- 標題介紹區 -->
+<div class="hero-section" id="hero-section">
+    <h1 class="hero-title" id="hero-title">大健康 AI 智慧健康管理</h1>
+    <p class="hero-subtitle" id="hero-subtitle">
+        結合人工智慧與精密評估，<br>
+        守護您的心血管健康，<br>
+        為您的身體塑建最完美的黃金體態。
+    </p>
+</div>
+
+<!-- 雙功能入口卡片 -->
+<div class="portal-grid" id="portal-grid">
+    
+    <!-- 模組 1: 血壓量測紀錄 -->
+    <div class="glass-card portal-card" id="card-bp" onclick="window.location.href='{{ url_for('blood_pressure') }}'">
+        <div>
+            <!-- 心血管健康雞湯 -->
+            <div class="soup-bubble" id="soup-bp">
+                心臟的每一次跳動，都是生命的交響樂；維護心血管，是您對生命最溫柔的承諾。
+            </div>
+            
+            <div class="portal-icon-wrapper" id="icon-bp-wrapper">
+                <!-- 心血管圖標 -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+            </div>
+            
+            <h2 class="portal-title" id="title-bp">血壓量測紀錄</h2>
+            <p class="portal-desc" id="desc-bp">
+                記錄您每日的血壓數據。本系統採用雙臂血壓交叉對比技術，基於國際心臟科學會建議指標，為您實時分析心臟搏動、血管壓力，並針對異常左右臂血壓差提供智慧健康管理。
+            </p>
+        </div>
+        <a href="{{ url_for('blood_pressure') }}" class="portal-btn" id="btn-goto-bp">
+            <span>進入血壓管理系統</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+        </a>
+    </div>
+
+    <!-- 模組 2: 體態檢測 -->
+    <div class="glass-card portal-card" id="card-pose" onclick="window.location.href='{{ url_for('pose_detection') }}'">
+        <div>
+            <!-- 體態檢測健康雞湯 -->
+            <div class="soup-bubble" id="soup-pose">
+                挺拔的姿態是自信的基石，關注體態，讓您的身體回到最自然平衡的狀態。
+            </div>
+            
+            <div class="portal-icon-wrapper" id="icon-pose-wrapper">
+                <!-- 人體骨架圖標 -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="5" r="1"/>
+                    <path d="m9 20 3-6 3 6"/>
+                    <path d="m6 8 6 2 6-2"/>
+                    <path d="M12 10v4"/>
+                </svg>
+            </div>
+            
+            <h2 class="portal-title" id="title-pose">智慧體態檢測</h2>
+            <p class="portal-desc" id="desc-pose">
+                採用先進的深度學習 AI 模型，一鍵上傳站姿或坐姿照片。系統將快速識別您的 33 個關鍵人體關節點，對比肩膀傾斜度、骨盆水平度等，自動評估高低肩與脊椎不對稱風險。
+            </p>
+        </div>
+        <a href="{{ url_for('pose_detection') }}" class="portal-btn" id="btn-goto-pose">
+            <span>開始 AI 骨骼掃描</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+        </a>
+    </div>
+
+</div>
+{% endblock %}

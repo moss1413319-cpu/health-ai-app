@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}血壓量測紀錄 | 大健康 AI 智慧檢測平台{% endblock %}
+
+{% block content %}
+<!-- 心血管防護心靈雞湯 -->
+<div class="soup-bubble" id="bp-page-soup" style="max-width: 800px; margin: 0 auto 2.5rem auto;">
+    心臟的每一次跳動，都是生命的交響樂；維護心血管，是您對生命最溫柔的承諾。
+</div>
+
+<div class="hero-section" style="margin-bottom: 2rem; text-align: left;">
+    <h1 class="hero-title" style="font-size: 3rem; margin-bottom: 0.5rem;">血壓量測與健康記錄系統</h1>
+    <p class="hero-subtitle" style="margin: 0; font-size: 1.4rem;">輸入雙手量測的生理指標，系統將結合臨床心血管標準，對比左手與右手收縮壓、舒張壓落差以及血氧飽和度，智慧辨識健康管理。</p>
+</div>
+
+<!-- 最新檢測警示結果（如有） -->
+{% if latest_result %}
+<div class="glass-card" style="margin-bottom: 2rem;" id="latest-result-card">
+    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 5px var(--color-primary));">
+            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+            <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin: 0;">最新評估診斷報告 ({{ latest_result.name }})</h2>
+    </div>
+
+    <!-- 顯示警示區 -->
+    {% if latest_result.warnings %}
+        {% for alert in latest_result.warnings %}
+        <div class="alert-box {% if alert.level == 'danger' %}alert-danger{% else %}alert-warning{% endif %}">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <div class="alert-content">
+                <div class="alert-title">{% if alert.level == 'danger' %}【就醫警示】{% else %}【健康提示】{% endif %}{{ alert.title }}</div>
+                <div class="alert-text">{{ alert.message }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert-box alert-success">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <div class="alert-content">
+                <div class="alert-title">【心血管狀態良好】</div>
+                <div class="alert-text">您的雙手血壓數值、血壓落差、心率及血氧均在國際標準正常範圍內。請保持良好的生活作息！</div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- 數值詳情簡報 -->
+    <div class="metric-grid" style="margin-top: 1rem;">
+        <div class="metric-card">
+            <div class="metric-label">左手血壓 (SYS/DIA)</div>
+            <div class="metric-value" style="color: var(--color-secondary);">{{ latest_result.left_sys }}/{{ latest_result.left_dia }}</div>
+            <div class="metric-status" style="color: var(--text-secondary);">mmHg</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">右手血壓 (SYS/DIA)</div>
+            <div class="metric-value" style="color: var(--color-secondary);">{{ latest_result.right_sys }}/{{ latest_result.right_dia }}</div>
+            <div class="metric-status" style="color: var(--text-secondary);">mmHg</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">雙臂收縮壓差值</div>
+            <div class="metric-value" style="color: {% if latest_result.sys_diff >= 15 %}var(--color-danger){% elif latest_result.sys_diff >= 10 %}var(--color-warning){% else %}var(--color-success){% endif %};">
+                {{ latest_result.sys_diff }}
+            </div>
+            <div class="metric-status" style="color: var(--text-secondary);">mmHg ({{ latest_result.sys_diff_pct }}%)</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">心率 / 血氧</div>
+            <div class="metric-value" style="color: var(--color-success);">{{ latest_result.heart_rate }} / {{ latest_result.spo2 }}%</div>
+            <div class="metric-status" style="color: var(--text-secondary);">bpm / SpO₂</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="portal-grid" style="grid-template-columns: 1fr; gap: 2rem;">
+    <!-- 血壓輸入表單 -->
+    <div class="glass-card" id="form-container">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z"/>
+            </svg>
+            新增血壓量測紀錄
+        </h2>
+
+        <form action="{{ url_for('blood_pressure') }}" method="POST" id="bp-form">
+            <div class="form-grid">
+                <!-- 基本資料 -->
+                <div class="form-group">
+                    <label for="name">個案姓名 NAME *</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="請輸入姓名" required value="{{ last_inputs.name if last_inputs else '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="dob">個案出生年月日 *</label>
+                    <input type="date" id="dob" name="dob" class="form-control" required value="{{ last_inputs.dob if last_inputs else '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="gender">性別 GENDER *</label>
+                    <select id="gender" name="gender" class="form-control" required>
+                        <option value="" disabled selected>請選擇</option>
+                        <option value="男" {% if last_inputs and last_inputs.gender == '男' %}selected{% endif %}>男 (Male)</option>
+                        <option value="女" {% if last_inputs and last_inputs.gender == '女' %}selected{% endif %}>女 (Female)</option>
+                        <option value="其他" {% if last_inputs and last_inputs.gender == '其他' %}selected{% endif %}>其他 (Other)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="measure_time">量測時間 MEASUREMENT TIME *</label>
+                    <input type="datetime-local" id="measure_time" name="measure_time" class="form-control" required>
+                </div>
+
+                <!-- 左手數值 -->
+                <div class="form-group">
+                    <label for="left_sys">左手收縮壓 SBP (mmHg) *</label>
+                    <input type="number" id="left_sys" name="left_sys" class="form-control" placeholder="高壓 e.g. 120" min="50" max="250" required value="{{ last_inputs.left_sys if last_inputs else '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="left_dia">左手舒張壓 DBP (mmHg) *</label>
+                    <input type="number" id="left_dia" name="left_dia" class="form-control" placeholder="低壓 e.g. 80" min="30" max="180" required value="{{ last_inputs.left_dia if last_inputs else '' }}">
+                </div>
+
+                <!-- 右手數值 -->
+                <div class="form-group">
+                    <label for="right_sys">右手收縮壓 SBP (mmHg) *</label>
+                    <input type="number" id="right_sys" name="right_sys" class="form-control" placeholder="高壓 e.g. 122" min="50" max="250" required value="{{ last_inputs.right_sys if last_inputs else '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="right_dia">右手舒張壓 DBP (mmHg) *</label>
+                    <input type="number" id="right_dia" name="right_dia" class="form-control" placeholder="低壓 e.g. 82" min="30" max="180" required value="{{ last_inputs.right_dia if last_inputs else '' }}">
+                </div>
+
+                <!-- 其他生理指標 -->
+                <div class="form-group">
+                    <label for="heart_rate">心率 HEART RATE (bpm) *</label>
+                    <input type="number" id="heart_rate" name="heart_rate" class="form-control" placeholder="心跳 e.g. 72" min="30" max="220" required value="{{ last_inputs.heart_rate if last_inputs else '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="spo2">血氧 SpO₂ (%) *</label>
+                    <input type="number" id="spo2" name="spo2" class="form-control" placeholder="血氧飽和度 e.g. 98" min="50" max="100" required value="{{ last_inputs.spo2 if last_inputs else '' }}">
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" class="btn btn-primary" id="btn-submit-bp">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                    送出檢測並分析
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-demo-fill" onclick="fillDemoData()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><path d="m10 15 5-3-5-3v6Z"/>
+                    </svg>
+                    載入正常 Demo 資料
+                </button>
+                <button type="button" class="btn btn-secondary" id="btn-demo-fill-danger" onclick="fillDemoDataDanger()" style="border-color: rgba(255, 94, 87, 0.3); color: var(--color-danger);">
+                    載入警示 Demo 資料
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 歷史紀錄表格 -->
+    <div class="glass-card" id="history-container">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between;">
+            <span style="display: flex; align-items: center; gap: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/>
+                </svg>
+                血壓量測歷史紀錄
+            </span>
+            <span style="font-size: 0.8rem; font-weight: normal; color: var(--text-muted);">
+                共 {{ history|length }} 筆記錄
+            </span>
+        </h2>
+
+        {% if history %}
+        <div class="table-container">
+            <table class="health-table" id="history-table">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>生日 / 性別</th>
+                        <th>量測時間</th>
+                        <th>左手壓 (高/低)</th>
+                        <th>右手壓 (高/低)</th>
+                        <th>壓差 (SYS)</th>
+                        <th>心率 / 血氧</th>
+                        <th>評估狀態</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for rec in history %}
+                    <tr class="{% if rec.status_level == 'danger' %}row-danger{% elif rec.status_level == 'warning' %}row-warning{% endif %}">
+                        <td style="font-weight: 600;">{{ rec.name }}</td>
+                        <td>{{ rec.dob }} <span style="color: var(--text-muted);">({{ rec.gender }})</span></td>
+                        <td style="font-size: 0.8rem;">{{ rec.measure_time.replace('T', ' ') }}</td>
+                        <td>
+                            <span style="color: {% if rec.left_sys >= 140 or rec.left_sys < 90 %}var(--color-warning){% else %}var(--text-primary){% endif %}; font-weight: 600;">{{ rec.left_sys }}</span> 
+                            / 
+                            <span style="color: {% if rec.left_dia >= 90 or rec.left_dia < 60 %}var(--color-warning){% else %}var(--text-primary){% endif %};">{{ rec.left_dia }}</span>
+                        </td>
+                        <td>
+                            <span style="color: {% if rec.right_sys >= 140 or rec.right_sys < 90 %}var(--color-warning){% else %}var(--text-primary){% endif %}; font-weight: 600;">{{ rec.right_sys }}</span> 
+                            / 
+                            <span style="color: {% if rec.right_dia >= 90 or rec.right_dia < 60 %}var(--color-warning){% else %}var(--text-primary){% endif %};">{{ rec.right_dia }}</span>
+                        </td>
+                        <td>
+                            <span style="color: {% if rec.sys_diff >= 15 %}var(--color-danger){% elif rec.sys_diff >= 10 %}var(--color-warning){% else %}var(--color-success){% endif %}; font-weight: 600;">
+                                {{ rec.sys_diff }} mmHg
+                            </span>
+                            <br>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">落差 {{ rec.sys_diff_pct }}%</span>
+                        </td>
+                        <td>
+                            <span style="color: {% if rec.heart_rate > 100 or rec.heart_rate < 60 %}var(--color-warning){% else %}var(--text-primary){% endif %};">{{ rec.heart_rate }} bpm</span>
+                            /
+                            <span style="color: {% if rec.spo2 < 95 %}var(--color-danger){% else %}var(--text-primary){% endif %}; font-weight: 600;">{{ rec.spo2 }}%</span>
+                        </td>
+                        <td>
+                            {% if rec.status_level == 'danger' %}
+                            <span class="badge badge-danger">就醫警示</span>
+                            {% elif rec.status_level == 'warning' %}
+                            <span class="badge badge-warning">健康提示</span>
+                            {% else %}
+                            <span class="badge badge-normal">狀態正常</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem; opacity: 0.5;">
+                <rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 8v8"/><path d="M8 12h8"/>
+            </svg>
+            <p>目前尚無血壓量測紀錄。請於上方輸入數據進行首次 AI 心血管分析！</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 設定預設量測時間為本地目前時間
+    document.addEventListener('DOMContentLoaded', function() {
+        const timeInput = document.getElementById('measure_time');
+        if (timeInput) {
+            const now = new Date();
+            // 格式化為 YYYY-MM-DDThh:mm
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            timeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+    });
+
+    // 載入正常 Demo 資料
+    function fillDemoData() {
+        document.getElementById('name').value = '王大明';
+        document.getElementById('dob').value = '1985-06-12';
+        document.getElementById('gender').value = '男';
+        document.getElementById('left_sys').value = '118';
+        document.getElementById('left_dia').value = '76';
+        document.getElementById('right_sys').value = '120';
+        document.getElementById('right_dia').value = '78';
+        document.getElementById('heart_rate').value = '72';
+        document.getElementById('spo2').value = '98';
+        
+        // 滾動到表單頂部
+        document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // 載入異常/警示 Demo 資料
+    function fillDemoDataDanger() {
+        document.getElementById('name').value = '李阿姨';
+        document.getElementById('dob').value = '1960-03-24';
+        document.getElementById('gender').value = '女';
+        // 故意製造收縮壓高且雙手臂壓差達 18mmHg (超過15mmHg)
+        document.getElementById('left_sys').value = '148';
+        document.getElementById('left_dia').value = '88';
+        document.getElementById('right_sys').value = '130';
+        document.getElementById('right_dia').value = '82';
+        document.getElementById('heart_rate').value = '88';
+        // 製造血氧偏低 94%
+        document.getElementById('spo2').value = '93';
+        
+        document.getElementById('form-container').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+{% endblock %}
